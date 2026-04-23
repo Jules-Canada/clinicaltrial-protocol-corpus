@@ -1,0 +1,4 @@
+ct_corpus/
+__pycache__/
+*.pyc
+.DS_Store
