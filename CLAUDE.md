@@ -25,5 +25,6 @@ sponsor — lead sponsor name
 source_url — PDF URL the text was extracted from
 retrieved_date — ISO date of download
 page_count — number of pages in source PDF
+text_source — "digital" (text extracted) or "needs_ocr" (scanned PDF, no text)
 sections — dict of detected protocol sections and their text
-full_text — complete extracted text
+full_text — complete extracted text (empty string if needs_ocr)

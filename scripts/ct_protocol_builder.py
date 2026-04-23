@@ -103,7 +103,8 @@ def scan_for_work_items(session, limit, skip_nct_ids, skip_urls):
     work_items = []
     page_token = None
 
-    with tqdm(desc="Phase 1  scanning API", unit=" docs") as pbar:
+    with tqdm(desc="Phase 1  scanning API", unit=" docs", postfix={"studied": 0}) as pbar:
+        studies_scanned = 0
         while len(work_items) < limit:
             params = {"pageSize": 100, "format": "json"}
             if page_token:
@@ -112,6 +113,7 @@ def scan_for_work_items(session, limit, skip_nct_ids, skip_urls):
             data = fetch_page(session, params)
 
             for study in data.get("studies", []):
+                studies_scanned += 1
                 meta   = flatten_metadata(study)
                 nct_id = meta["nct_id"]
 
@@ -127,6 +129,7 @@ def scan_for_work_items(session, limit, skip_nct_ids, skip_urls):
                         continue
                     work_items.append({**meta, "url": url, "filename": filename})
                     pbar.update(1)
+                    pbar.set_postfix({"studied": studies_scanned})
 
                 if len(work_items) >= limit:
                     break
@@ -193,6 +196,8 @@ def process_work_item(item):
     if not ok:
         return None
 
+    text_source = "needs_ocr" if (page_count > 0 and not full_text.strip()) else "digital"
+
     return {
         "nct_id":         nct_id,
         "title":          item["title"],
@@ -202,6 +207,7 @@ def process_work_item(item):
         "source_url":     url,
         "retrieved_date": date.today().isoformat(),
         "page_count":     page_count,
+        "text_source":    text_source,
         "sections":       {},
         "full_text":      full_text,
     }
